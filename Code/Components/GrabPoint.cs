@@ -103,6 +103,9 @@ public partial class GrabPoint : Component, IGrabbable
 
 	protected override void DrawGizmos()
 	{
+		if ( !Gizmo.IsSelected )
+			return;
+		
 		Gizmo.Draw.Color = Color.Cyan.WithAlpha( 0.2f );
 		Gizmo.Draw.Model( "models/hands/human_hand_right.vmdl" );
 	}
