@@ -1197,8 +1197,8 @@
   "ResourceVersion": 1,
   "__version": 1,
   "__references": [
-    "facepunch.v_usp",
     "facepunch.v_usp_magazine",
+    "facepunch.v_usp#84434",
     "facepunch.w_usp"
   ]
 }
