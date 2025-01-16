@@ -25,3 +25,4 @@ code/Editor/.vscode/*
 !*.vmdl_c
 *.los
 *.vpk
+.sbox/
