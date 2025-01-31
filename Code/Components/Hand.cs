@@ -130,7 +130,7 @@ public partial class Hand : Component, Component.ITriggerListener
 		Velocity = newPosition - prevPosition;
 	}
 
-	protected IGrabbable FindRemotePickupItem()
+	protected IGrabbable LookForHandAligned( float size = 1f )
 	{
 		// We're gonna look for an item that the hand is kinda looking at
 
@@ -139,22 +139,46 @@ public partial class Hand : Component, Component.ITriggerListener
 
 		var tr = Scene.Trace.Ray( WorldPosition, WorldPosition + fwd * 100000f )
 		.IgnoreGameObject( GameObject )
+		.Size( size )
 		.Run();
-
-		Gizmo.Draw.Color = Color.Red;
 
 		if ( tr.Hit )
 		{
 			if ( tr.GameObject.Root.Components.Get<BaseInteractable>( FindMode.EnabledInSelfAndDescendants ) is { } interactable )
 			{
-				Gizmo.Draw.Color = Color.Green;
-
+				Gizmo.Draw.Color = Color.White;
+				Gizmo.Draw.LineSphere( new Sphere( tr.GameObject.WorldPosition, 2 ), 8 );
 				var grabbable = interactable.GrabbableDirectory.FirstOrDefault();
 				return grabbable;
 			}
 		}
 
-		Gizmo.Draw.Line( tr.StartPosition, tr.EndPosition );
+		return null;
+	}
+
+
+	protected IGrabbable LookForHeadAligned( float size = 1f )
+	{
+		// We're gonna look for an item that the hand is kinda looking at
+
+		var rot = Scene.Camera.WorldRotation;
+		var fwd = rot.Forward;
+
+		var tr = Scene.Trace.Ray( Scene.Camera.WorldPosition, Scene.Camera.WorldPosition + fwd * 100000f )
+		.IgnoreGameObject( GameObject )
+		.Size( size )
+		.Run();
+
+		if ( tr.Hit )
+		{
+			if ( tr.GameObject.Root.Components.Get<BaseInteractable>( FindMode.EnabledInSelfAndDescendants ) is { } interactable )
+			{
+				Gizmo.Draw.Color = Color.White;
+				Gizmo.Draw.LineSphere( new Sphere( tr.GameObject.WorldPosition, 2 ), 8 );
+				var grabbable = interactable.GrabbableDirectory.FirstOrDefault();
+				return grabbable;
+			}
+		}
 
 		return null;
 	}
@@ -164,21 +188,28 @@ public partial class Hand : Component, Component.ITriggerListener
 		// Are we already holding one?
 		if ( CurrentGrabbable.IsValid() ) return CurrentGrabbable;
 
-
 		// First we'll look in the directory of stuff close to us
 		var directory = HoveredDirectory.Where( x => x.IsValid() )
 			.OrderBy( x => x.GameObject.WorldPosition.Distance( WorldPosition ) );
 
-		if ( directory.FirstOrDefault() is {IsValid: true } item )
-		{
-			return item;
-		}
+		var item = directory.FirstOrDefault();
+		if ( item.IsValid() ) return item;
 
-		if ( FindRemotePickupItem() is {  IsValid: true } lookItem )
-		{
-			return lookItem;
-		}
+		// Look for something we're directly aiming at with our hand
+		item = LookForHandAligned( 1f );
+		if ( item.IsValid() ) return item;
 
+		// Look for something we're directly aiming at with our head
+		item = LookForHeadAligned( 1f );
+		if ( item.IsValid() ) return item;
+
+		// Go outside the box, find something that's a bit off but good enough
+		item = LookForHeadAligned( 10f );
+		if ( item.IsValid() ) return item;
+
+		// same with the hands
+		item = LookForHandAligned( 5f );
+		if ( item.IsValid() ) return item;
 
 		return null;
 	}
@@ -216,32 +247,6 @@ public partial class Hand : Component, Component.ITriggerListener
 	}
 
 	[Property] public SkinnedModelRenderer Model { get; set; }
-
-	void UpdateRemotePickup()
-	{
-		var att = Model.GetAttachment( "ui_pointer" ) ?? default;
-
-		var tr = Scene.Trace.Ray( att.Position, att.Position + att.Forward * 100000f )
-			.IgnoreGameObject( GameObject )
-			.Size( 10f )
-			.Run();
-		
-
-		Gizmo.Draw.Color = Color.Red;
-
-		if ( tr.Hit )
-		{
-			if ( tr.GameObject.Root.Components.Get<BaseInteractable>( FindMode.EnabledInSelfAndDescendants ) is { } interactable )
-			{
-				var grabbable = interactable.GrabbableDirectory.FirstOrDefault();
-				if ( IsDown( grabbable.GrabInput ) && interactable.Interact( this, grabbable ) )
-				{
-					// We did it! Respond?
-				}
-			}
-		}
-		Gizmo.Draw.Line( tr.StartPosition, tr.EndPosition );
-	}
 
 	/// <summary>
 	/// Is this hand holding something right now?
