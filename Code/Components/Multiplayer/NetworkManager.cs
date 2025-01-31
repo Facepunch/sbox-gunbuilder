@@ -17,9 +17,9 @@ public sealed class NetworkManager : Component, Component.INetworkListener
 		//
 		// Create a lobby if we're not connected
 		//
-		if ( !GameNetworkSystem.IsActive )
+		if ( !Networking.IsActive )
 		{
-			GameNetworkSystem.CreateLobby();
+			Networking.CreateLobby( new() );
 		}
 	}
 

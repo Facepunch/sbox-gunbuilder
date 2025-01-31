@@ -53,7 +53,7 @@ public partial class LaserPointerComponent : Component, Component.ExecuteInEdito
 		{
 			return new()
 			{
-				new() { StringCP = "0", Value = ParticleControlPoint.ControlPointValueInput.Vector3, VectorValue = Transform.Position },
+				new() { StringCP = "0", Value = ParticleControlPoint.ControlPointValueInput.Vector3, VectorValue = WorldPosition },
 				new() { StringCP = "1", Value = ParticleControlPoint.ControlPointValueInput.Vector3, VectorValue = GetTraceEnd() },
 				new() { StringCP = "2", Value = ParticleControlPoint.ControlPointValueInput.Vector3, VectorValue = new( LaserColor.r, LaserColor.g, LaserColor.b )  },
 			};
@@ -94,7 +94,7 @@ public partial class LaserPointerComponent : Component, Component.ExecuteInEdito
 	/// <returns></returns>
 	private Vector3 GetTraceEnd()
 	{
-		var tr = Scene.Trace.Ray( Transform.Position, Transform.Position + ( Transform.Rotation.Forward * Dist ) ).Run();
+		var tr = Scene.Trace.Ray( WorldPosition, WorldPosition + ( WorldRotation.Forward * Dist ) ).Run();
 		return tr.EndPosition;
 	}
 

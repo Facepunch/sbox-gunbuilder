@@ -96,8 +96,8 @@ public partial class Interactable : BaseInteractable
 		// Are we holding from a secondary hold point as well?
 		if ( SecondaryGrabPoint.IsValid() )
 		{
-			var direction = (SecondaryGrabPoint.Hand.Transform.Position - PrimaryGrabPoint.Hand.Transform.Position).Normal;
-			targetRotation = Rotation.LookAt( direction, secondaryGrabPoint.Hand.Transform.Rotation.Up );
+			var direction = (SecondaryGrabPoint.Hand.WorldPosition - PrimaryGrabPoint.Hand.WorldPosition).Normal;
+			targetRotation = Rotation.LookAt( direction, secondaryGrabPoint.Hand.WorldRotation.Up );
 		}
 
 		return targetRotation;
@@ -107,13 +107,14 @@ public partial class Interactable : BaseInteractable
 	{
 		var velocity = Rigidbody.Velocity;
 		var holdPos = PrimaryGrabPoint.Hand.GetHoldPosition( PrimaryGrabPoint );
-		var grabPointPos = PrimaryGrabPoint.GameObject.Transform.Position;
 
-		Vector3.SmoothDamp( Rigidbody.Transform.Position, holdPos + ( holdPos - grabPointPos ), ref velocity, CalcVelocityWeight(), Time.Delta );
+		var grabPointPos = PrimaryGrabPoint.GameObject.WorldPosition;
+
+		Vector3.SmoothDamp( Rigidbody.WorldPosition, holdPos + ( holdPos - grabPointPos ), ref velocity, CalcVelocityWeight(), Time.Delta );
 		Rigidbody.Velocity = velocity;
 
 		var angularVelocity = Rigidbody.AngularVelocity;
-		Rotation.SmoothDamp( Rigidbody.Transform.Rotation, GetHoldRotation(), ref angularVelocity, CalcAngularVelocityWeight(), Time.Delta );
+		Rotation.SmoothDamp( Rigidbody.WorldRotation, GetHoldRotation(), ref angularVelocity, CalcAngularVelocityWeight(), Time.Delta );
 		Rigidbody.AngularVelocity = angularVelocity;
 	}
 

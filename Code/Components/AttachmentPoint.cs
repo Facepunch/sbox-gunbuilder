@@ -55,8 +55,8 @@ public partial class AttachmentPoint : Component, Component.ExecuteInEditor, Com
 
 		// We can only attach if the attachable is facing the same way as our attachment point.
 		// Good for stuff like magazines.
-		var attachableFwd = attachable.Transform.Rotation.Forward;
-		var thisFwd = Transform.Rotation.Forward;
+		var attachableFwd = attachable.WorldRotation.Forward;
+		var thisFwd = WorldRotation.Forward;
 		var dot = attachableFwd.Dot( thisFwd );
 		if ( dot > 0.8f ) return true;
 
@@ -96,8 +96,8 @@ public partial class AttachmentPoint : Component, Component.ExecuteInEditor, Com
 		// TODO: Find out a better way to handle this. This kinda sucks.
 		if ( CurrentAttachable.IsValid() )
 		{
-			CurrentAttachable.Transform.Position = GameObject.Transform.Position;
-			CurrentAttachable.Transform.Rotation = GameObject.Transform.Rotation;
+			CurrentAttachable.WorldPosition = GameObject.WorldPosition;
+			CurrentAttachable.WorldRotation = GameObject.WorldRotation;
 		}
 	}
 
@@ -107,6 +107,8 @@ public partial class AttachmentPoint : Component, Component.ExecuteInEditor, Com
 	/// <param name="attachable"></param>
 	public bool TryAttach( Attachable attachable )
 	{
+		if ( attachable.IsAttached ) return false;
+
 		Log.Info( $"> Try attaching {this} to {attachable}" );
 
 		if ( !CanAttach( attachable ) ) return false;

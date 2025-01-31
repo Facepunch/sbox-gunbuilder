@@ -55,8 +55,8 @@ public partial record Bullet
 	public BulletComponent CreateInWorld( Vector3 position, Rotation rotation = default )
 	{
 		var go = Prefab.Clone();
-		go.Transform.Position = position;
-		go.Transform.Rotation = rotation;
+		go.WorldPosition = position;
+		go.WorldRotation = rotation;
 		go.Enabled = true;
 
 		// Get the bullet

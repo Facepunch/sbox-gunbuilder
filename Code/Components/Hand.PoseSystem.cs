@@ -65,11 +65,6 @@ public partial class Hand
 		for ( FingerValue v = FingerValue.ThumbCurl; v <= FingerValue.PinkyCurl; ++v )
 		{
 			SkinnedModelComponent.Set( AnimGraphNames[(int)v], source.GetFingerValue( v ) );
-
-			if ( v == FingerValue.IndexCurl && WantsToPoint )
-			{
-				SkinnedModelComponent.Set( AnimGraphNames[(int)v], 0 );
-			}
 		}
 
 		if ( preset is not null )

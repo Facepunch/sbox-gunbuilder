@@ -6,6 +6,6 @@ public sealed class LookAtLight : Component
 
 	protected override void OnUpdate()
 	{
-		GameObject.Transform.Rotation = Rotation.LookAt( (Target.Transform.Position - Transform.Position).Normal, Vector3.Up );
+		GameObject.WorldRotation = Rotation.LookAt( (Target.WorldPosition - WorldPosition).Normal, Vector3.Up );
 	}
 }

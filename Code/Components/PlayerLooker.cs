@@ -22,12 +22,12 @@ public partial class PlayerLooker : Component
 	{
 		if ( TimeSinceSnap < 0.2f ) return;
 
-		var angles = Head.Transform.Rotation.Angles().WithPitch( 0f );
+		var angles = Head.WorldRotation.Angles().WithPitch( 0f );
 
 		var rot = angles.ToRotation();
 		var right = isRight ? rot.Right : rot.Left;
 
 		TimeSinceSnap = 0;
-		Transform.Rotation *= Rotation.From( 0, isRight ? -Angle : Angle, 0 );
+		WorldRotation *= Rotation.From( 0, isRight ? -Angle : Angle, 0 );
 	}
 }

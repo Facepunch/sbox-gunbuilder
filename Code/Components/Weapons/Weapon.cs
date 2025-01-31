@@ -138,7 +138,7 @@ public partial class Weapon : Interactable
 	/// <summary>
 	/// The weapon's forward direction, originating normally from the muzzle, straight forward.
 	/// </summary>
-	protected virtual Ray WeaponRay => new Ray( MuzzleGameObject.Transform.Position, MuzzleGameObject.Transform.Rotation.Forward );
+	protected virtual Ray WeaponRay => new Ray( MuzzleGameObject.WorldPosition, MuzzleGameObject.WorldRotation.Forward );
 
 	/// <summary>
 	/// Produces a trace that we can use for weapon shooting.
@@ -195,12 +195,12 @@ public partial class Weapon : Interactable
 		}
 	}
 
-	[Broadcast]
+	[Rpc.Broadcast]
 	private void TryDryShoot()
 	{
 		if ( !TimeUntilNextDryFire ) return;
 
-		Sound.Play( DryFireSound, Transform.Position );
+		Sound.Play( DryFireSound, WorldPosition );
 		TimeUntilNextDryFire = 0.5f;
 	}
 
@@ -208,8 +208,8 @@ public partial class Weapon : Interactable
 	{
 		return new Vector2()
 		{
-			y = Game.Random.Int( VerticalRecoil.x.CeilToInt(), VerticalRecoil.y.CeilToInt() ),
-			x = Game.Random.Int( HorizontalRecoil.x.CeilToInt(), HorizontalRecoil.y.CeilToInt() )
+			y = Game.Random.Int( VerticalRecoil.Min.CeilToInt(), VerticalRecoil.Max.CeilToInt() ),
+			x = Game.Random.Int( HorizontalRecoil.Min.CeilToInt(), HorizontalRecoil.Max.CeilToInt() )
 		};
 	}
 
@@ -227,7 +227,7 @@ public partial class Weapon : Interactable
 		return null;
 	}
 
-	[Broadcast]
+	[Rpc.Broadcast]
 	public void TryShoot()
 	{
 		if ( !CanShoot() ) return;
@@ -286,16 +286,16 @@ public partial class Weapon : Interactable
 			return;
 		}
 
-		var worldBullet = bullet.CreateInWorld( EjectionPort.Transform.Position, EjectionPort.Transform.Rotation );
+		var worldBullet = bullet.CreateInWorld( EjectionPort.WorldPosition, EjectionPort.WorldRotation );
 
 		var rb = worldBullet.Components.Get<Rigidbody>( FindMode.EnabledInSelfAndDescendants );
 		if ( rb.IsValid() )
 		{
-			rb.ApplyForce( EjectionPort.Transform.Rotation.Right * 1500000 );
-			rb.ApplyForce( EjectionPort.Transform.Rotation.Up * Game.Random.Float( 100000, 200000 ) );
+			rb.ApplyForce( EjectionPort.WorldRotation.Right * 1500000 );
+			rb.ApplyForce( EjectionPort.WorldRotation.Up * Game.Random.Float( 100000, 200000 ) );
 
-			//rb.AngularVelocity = EjectionPort.Transform.Rotation.Right * 10;
-			rb.AngularVelocity = worldBullet.Transform.Rotation.Forward * 10;
+			//rb.AngularVelocity = EjectionPort.WorldRotation.Right * 10;
+			rb.AngularVelocity = worldBullet.WorldRotation.Forward * 10;
 		}
 	}
 

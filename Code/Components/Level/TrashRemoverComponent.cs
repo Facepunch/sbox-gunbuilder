@@ -15,7 +15,7 @@ public sealed class TrashRemoverComponent : Component, Component.ICollisionListe
 	{
 		if ( TrashSound is not null )
 		{
-			Sound.Play( TrashSound, Transform.Position );
+			Sound.Play( TrashSound, WorldPosition );
 		}
 	}
 

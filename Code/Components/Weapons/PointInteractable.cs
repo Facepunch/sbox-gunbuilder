@@ -89,13 +89,13 @@ public partial class PointInteractable : BaseInteractable
 		if ( prev != 0 && value == 0 )
 		{
 			if ( ZeroSound is not null )
-				Sound.Play( ZeroSound, Transform.Position );
+				Sound.Play( ZeroSound, WorldPosition );
 		}
 
 		if ( prev != 1 && value == 1 )
 		{
 			if ( OneSound is not null )
-				Sound.Play( OneSound, Transform.Position );
+				Sound.Play( OneSound, WorldPosition );
 		}
 
 		OnCompletionValue?.Invoke( prev, value );
@@ -106,7 +106,7 @@ public partial class PointInteractable : BaseInteractable
 		if ( Renderer.IsValid() )
 		{
 			// Store some initial data
-			DistanceBetweenStartAndEnd = Vector3.DistanceBetween( End.Transform.Position, Start.Transform.Position );
+			DistanceBetweenStartAndEnd = Vector3.DistanceBetween( End.WorldPosition, Start.WorldPosition );
 			InitialBoneLocalTransform = BoneGameObject.Transform.Local;
 		}
 
@@ -141,7 +141,7 @@ public partial class PointInteractable : BaseInteractable
 	protected Vector3 CalcLocalPosition()
 	{
 		var pos = InitialBoneLocalTransform.Position;
-		var direction = (End.Transform.LocalPosition - Start.Transform.LocalPosition).Normal;
+		var direction = (End.LocalPosition - Start.LocalPosition).Normal;
 		pos += direction * (DistanceBetweenStartAndEnd * completionValue);
 
 		return pos;
@@ -156,7 +156,7 @@ public partial class PointInteractable : BaseInteractable
 			BoneGameObject.Transform.Local = new Transform( CalcLocalPosition(), Rotation.Identity, 1 );
 			if ( CompletionValue.AlmostEqual( 1f ) )
 			{
-				BoneGameObject.Transform.LocalRotation = AnglesAtOne.ToRotation();
+				BoneGameObject.LocalRotation = AnglesAtOne.ToRotation();
 			}
 			return;
 		}
@@ -170,13 +170,13 @@ public partial class PointInteractable : BaseInteractable
 		CompletionValue = clamped;
 
 		// Move the primary grab point. This should always be the hand that's interacting with the interactable.
-		PrimaryGrabPoint.GameObject.Transform.Position = Vector3.Lerp( Start.Transform.Position, End.Transform.Position, clamped );
+		PrimaryGrabPoint.GameObject.WorldPosition = Vector3.Lerp( Start.WorldPosition, End.WorldPosition, clamped );
 		// Move the bone!
 		BoneGameObject.Transform.Local = new Transform( CalcLocalPosition(), Rotation.Identity, 1 );
 
 		if ( CompletionValue.AlmostEqual( 1f ) )
 		{
-			BoneGameObject.Transform.LocalRotation = AnglesAtOne.ToRotation();
+			BoneGameObject.LocalRotation = AnglesAtOne.ToRotation();
 		}
 	}
 }

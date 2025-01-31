@@ -36,7 +36,7 @@ public partial class SlideSlappingSystem : Component, Component.ITriggerListener
 		}
 
 		// If the hand's too far away, it doesn't exist anymore.
-		if ( Hand.Transform.Position.Distance( Transform.Position ) > 64f )
+		if ( Hand.WorldPosition.Distance( WorldPosition ) > 64f )
 		{
 			Hand = null;
 		}
@@ -49,9 +49,9 @@ public partial class SlideSlappingSystem : Component, Component.ITriggerListener
 	protected bool IsCorrectDirectionAndSpeed()
 	{
 		var velocity = Hand.Components.Get<Hand>( FindMode.EnabledInSelfAndDescendants )?.Velocity ?? 0f;
-		Vector3 relativeVelocity = Transform.Rotation.Inverse * velocity;
+		Vector3 relativeVelocity = WorldRotation.Inverse * velocity;
 		var relativeDir = relativeVelocity.Normal;
-		var howForward = relativeDir.Dot( Transform.Rotation.Forward );
+		var howForward = relativeDir.Dot( WorldRotation.Forward );
 
 		// Expose these to variables?
 		if ( velocity.Length < 1.2f ) return false;

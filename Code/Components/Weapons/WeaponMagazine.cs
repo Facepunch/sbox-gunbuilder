@@ -158,7 +158,7 @@ public sealed class WeaponMagazine : Component, IAmmoSource, Component.ITriggerL
 				}
 
 				if ( OnChamberSound is not null )
-					Sound.Play( OnChamberSound, Transform.Position );
+					Sound.Play( OnChamberSound, WorldPosition );
 
 				other.GameObject.Root.Destroy();
 			}

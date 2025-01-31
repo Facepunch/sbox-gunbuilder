@@ -35,7 +35,7 @@ public sealed class FlipUpTarget : Component, Component.IDamageable
 			
 			if ( TriggerSound is not null )
 			{
-				Sound.Play( TriggerSound, Transform.Position );
+				Sound.Play( TriggerSound, WorldPosition );
 			}
 		}
 	}
@@ -46,7 +46,7 @@ public sealed class FlipUpTarget : Component, Component.IDamageable
 	protected override void OnUpdate()
 	{
 		SmoothPitch = SmoothPitch.Approach( Triggered ? 90 : 180, Time.Delta * Speed );
-		Target.Transform.LocalRotation = Rotation.From( SmoothPitch, 0, 0 );
+		Target.LocalRotation = Rotation.From( SmoothPitch, 0, 0 );
 
 		if ( TimeSinceChanged > 1f && !Triggered ) Triggered = true;
 	}

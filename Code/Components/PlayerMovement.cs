@@ -10,7 +10,7 @@ public partial class PlayerMovement : Component
 		if ( Hand.GetController() is null ) return;
 
 		var inputDir = Hand.GetController().Joystick.Value;
-		var headRot = Head.Transform.Rotation;
+		var headRot = Head.WorldRotation;
 		var fwd = new Vector3( inputDir.y, -inputDir.x, 0 ) * headRot;
 
 		Move( fwd );
@@ -20,6 +20,6 @@ public partial class PlayerMovement : Component
 	{
 		direction = direction.WithZ( 0 );
 		var velocity = direction * Speed * Time.Delta;
-		GameObject.Transform.Position += velocity;
+		GameObject.WorldPosition += velocity;
 	}
 }

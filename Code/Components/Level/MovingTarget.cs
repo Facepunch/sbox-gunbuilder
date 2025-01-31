@@ -44,6 +44,6 @@ public sealed class MovingTarget : Component
 	{
 		SmoothDistance = SmoothDistance.Approach( Distance, Time.Delta * Speed );
 		var inches = MetersToInches( SmoothDistance );
-		Object.Transform.LocalPosition = Transform.Rotation.Forward * inches;
+		Object.LocalPosition = WorldRotation.Forward * inches;
 	}
 }

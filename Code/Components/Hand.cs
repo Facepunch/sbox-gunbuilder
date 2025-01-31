@@ -1,6 +1,7 @@
 using Sandbox.VR;
 using System.Diagnostics;
 using System.Numerics;
+using System.Text.Json.Serialization;
 
 public partial class Hand : Component, Component.ITriggerListener
 {
@@ -27,6 +28,12 @@ public partial class Hand : Component, Component.ITriggerListener
 	/// What the velocity?
 	/// </summary>
 	public Vector3 Velocity { get; set; }
+
+	/// <summary>
+	/// Debug output
+	/// </summary>
+	[Group( "Data" ), Property, JsonIgnore]
+	Component Current => CurrentGrabbable as Component;
 
 	/// <summary>
 	/// Is the hand grip down?
@@ -89,7 +96,6 @@ public partial class Hand : Component, Component.ITriggerListener
 		// Only if we succeed to interact with the interactable, take hold of the object.
 		if ( grabbable.StartGrabbing( this ) )
 		{
-			Log.Info( "Start grabbarino" );
 			// We did it! Respond?
 			CurrentGrabbable = grabbable;
 		}
@@ -116,7 +122,6 @@ public partial class Hand : Component, Component.ITriggerListener
 		var tx = controller.Transform;
 		// Bit of a hack, but the alyx controllers have a weird origin that I don't care for.
 		tx = tx.Add( Vector3.Forward * -2f, false );
-		tx = tx.WithRotation( tx.Rotation * Rotation.From( 20, -5, 0 ) );
 
 		var prevPosition = Transform.World.Position;
 		Transform.World = tx;
@@ -125,14 +130,57 @@ public partial class Hand : Component, Component.ITriggerListener
 		Velocity = newPosition - prevPosition;
 	}
 
+	protected IGrabbable FindRemotePickupItem()
+	{
+		// We're gonna look for an item that the hand is kinda looking at
+
+		var rot = WorldRotation *= Rotation.From( 45, 0, 0 );
+		var fwd = rot.Forward;
+
+		var tr = Scene.Trace.Ray( WorldPosition, WorldPosition + fwd * 100000f )
+		.IgnoreGameObject( GameObject )
+		.Run();
+
+		Gizmo.Draw.Color = Color.Red;
+
+		if ( tr.Hit )
+		{
+			if ( tr.GameObject.Root.Components.Get<BaseInteractable>( FindMode.EnabledInSelfAndDescendants ) is { } interactable )
+			{
+				Gizmo.Draw.Color = Color.Green;
+
+				var grabbable = interactable.GrabbableDirectory.FirstOrDefault();
+				return grabbable;
+			}
+		}
+
+		Gizmo.Draw.Line( tr.StartPosition, tr.EndPosition );
+
+		return null;
+	}
+
 	protected IGrabbable TryFindGrabbable()
 	{
 		// Are we already holding one?
 		if ( CurrentGrabbable.IsValid() ) return CurrentGrabbable;
 
-		return HoveredDirectory
-			.OrderBy( x => x.GameObject.Transform.Position.Distance( Transform.Position ) )
-			.FirstOrDefault();
+
+		// First we'll look in the directory of stuff close to us
+		var directory = HoveredDirectory.Where( x => x.IsValid() )
+			.OrderBy( x => x.GameObject.WorldPosition.Distance( WorldPosition ) );
+
+		if ( directory.FirstOrDefault() is {IsValid: true } item )
+		{
+			return item;
+		}
+
+		if ( FindRemotePickupItem() is {  IsValid: true } lookItem )
+		{
+			return lookItem;
+		}
+
+
+		return null;
 	}
 
 	protected override void OnUpdate()
@@ -148,7 +196,7 @@ public partial class Hand : Component, Component.ITriggerListener
 			if ( CurrentGrabbable.GrabInput == GrabInputType.Hover )
 			{
 				// Detach!
-				if ( CurrentGrabbable.GameObject.Transform.Position.Distance( Transform.Position ) > 3f )
+				if ( CurrentGrabbable.GameObject.WorldPosition.Distance( WorldPosition ) > 3f )
 				{
 					StopGrabbing();
 					return;
@@ -165,14 +213,7 @@ public partial class Hand : Component, Component.ITriggerListener
 		{
 			StopGrabbing();
 		}
-
-		if ( WantsToPoint )
-		{
-			UpdateRemotePickup();
-		}
 	}
-
-	public bool WantsToPoint => IsTriggerDown() && !IsHolding();
 
 	[Property] public SkinnedModelRenderer Model { get; set; }
 
@@ -182,7 +223,9 @@ public partial class Hand : Component, Component.ITriggerListener
 
 		var tr = Scene.Trace.Ray( att.Position, att.Position + att.Forward * 100000f )
 			.IgnoreGameObject( GameObject )
+			.Size( 10f )
 			.Run();
+		
 
 		Gizmo.Draw.Color = Color.Red;
 
@@ -190,8 +233,6 @@ public partial class Hand : Component, Component.ITriggerListener
 		{
 			if ( tr.GameObject.Root.Components.Get<BaseInteractable>( FindMode.EnabledInSelfAndDescendants ) is { } interactable )
 			{
-				Gizmo.Draw.Color = Color.Green;
-
 				var grabbable = interactable.GrabbableDirectory.FirstOrDefault();
 				if ( IsDown( grabbable.GrabInput ) && interactable.Interact( this, grabbable ) )
 				{
@@ -199,7 +240,6 @@ public partial class Hand : Component, Component.ITriggerListener
 				}
 			}
 		}
-
 		Gizmo.Draw.Line( tr.StartPosition, tr.EndPosition );
 	}
 
@@ -232,14 +272,14 @@ public partial class Hand : Component, Component.ITriggerListener
 	// Not sure what purpose this'll really serve soon.
 	internal Vector3 GetHoldPosition( IGrabbable grabbable )
 	{
-		var src = ModelGameObject.Transform.Position;
+		var src = ModelGameObject.WorldPosition;
 		return src;
 	}
 
 	// Not sure what purpose this'll really serve soon.
 	internal Rotation GetHoldRotation( IGrabbable grabbable )
 	{
-		return ModelGameObject.Transform.Rotation;
+		return ModelGameObject.WorldRotation;
 	}
 
 	/// <summary>
@@ -262,7 +302,7 @@ public partial class Hand : Component, Component.ITriggerListener
 		{
 			if ( HoveredDirectory.Contains( grabbable ) )
 			{
-				//	HoveredDirectory.Remove( grabbable );
+				HoveredDirectory.Remove( grabbable );
 			}
 		}
 	}

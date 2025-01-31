@@ -3,8 +3,8 @@ public partial class Weapon
 	private LegacyParticleSystem CreateParticleSystem( string particle, Vector3 pos, Rotation rot, List<ParticleControlPoint> cps = null, float decay = 5f )
 	{
 		var gameObject = Scene.CreateObject();
-		gameObject.Transform.Position = pos;
-		gameObject.Transform.Rotation = rot;
+		gameObject.WorldPosition = pos;
+		gameObject.WorldRotation = rot;
 
 		var p = gameObject.Components.Create<LegacyParticleSystem>();
 		p.Particles = ParticleSystem.Load( particle );
@@ -30,11 +30,11 @@ public partial class Weapon
 			var decal = Game.Random.FromList( decalResource.Decals );
 
 			var gameObject = Scene.CreateObject();
-			gameObject.Transform.Position = pos;
-			gameObject.Transform.Rotation = Rotation.LookAt( -normal );
+			gameObject.WorldPosition = pos;
+			gameObject.WorldRotation = Rotation.LookAt( -normal );
 
 			// Random rotation
-			gameObject.Transform.Rotation *= Rotation.FromAxis( Vector3.Forward, decal.Rotation.GetValue() );
+			gameObject.WorldRotation *= Rotation.FromAxis( Vector3.Forward, decal.Rotation.GetValue() );
 
 			var decalRenderer = gameObject.Components.Create<DecalRenderer>();
 			decalRenderer.Material = decal.Material;
@@ -59,7 +59,7 @@ public partial class Weapon
 	{
 		if ( ShootSound is not null )
 		{
-			if ( Sound.Play( ShootSound, MuzzleGameObject.Transform.Position ) is SoundHandle snd )
+			if ( Sound.Play( ShootSound, MuzzleGameObject.WorldPosition ) is SoundHandle snd )
 			{
 				snd.ListenLocal = !IsProxy;
 			}
@@ -88,7 +88,7 @@ public partial class Weapon
 			}
 		}
 
-		var origin = count == 0 ? MuzzleGameObject.Transform.Position : startPosition;
+		var origin = count == 0 ? MuzzleGameObject.WorldPosition : startPosition;
 
 		// What in tarnation is this 
 		CreateParticleSystem( effectPath, origin, Rotation.Identity, new()

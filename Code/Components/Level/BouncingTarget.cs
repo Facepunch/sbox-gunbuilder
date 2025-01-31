@@ -58,7 +58,7 @@ public sealed class BouncingTarget : Component
 
 		SmoothDistance = SmoothDistance.Approach( Distance, Time.Delta * Speed );
 		var inches = MetersToInches( SmoothDistance );
-		Object.Transform.LocalPosition = Transform.Rotation.Right * inches;
+		Object.LocalPosition = WorldRotation.Right * inches;
 
 		if ( SmoothDistance.AlmostEqual( Distance ) )
 		{

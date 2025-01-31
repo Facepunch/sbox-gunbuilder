@@ -100,7 +100,7 @@ public partial class WeaponChamber : Component, Component.ITriggerListener
 					}
 
 					if ( OnChamberSound is not null )
-						Sound.Play( OnChamberSound, Transform.Position );
+						Sound.Play( OnChamberSound, WorldPosition );
 
 					other.GameObject.Destroy();
 				}

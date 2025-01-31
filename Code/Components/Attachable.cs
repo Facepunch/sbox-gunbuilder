@@ -36,6 +36,11 @@ public sealed class Attachable : Component
 	AttachmentPoint CurrentAttachmentPoint { get; set; }
 
 	/// <summary>
+	/// Is this attached to something already?
+	/// </summary>
+	public bool IsAttached => CurrentAttachmentPoint.IsValid();
+
+	/// <summary>
 	/// Called when we attach to an attachment point
 	/// </summary>
 	/// <param name="attachmentPoint"></param>
@@ -52,7 +57,7 @@ public sealed class Attachable : Component
 		Tags.Set( "attached", true );
 
 		if ( AttachSound is not null )
-			Sound.Play( AttachSound, Transform.Position );
+			Sound.Play( AttachSound, WorldPosition );
 	}
 
 	/// <summary>
@@ -76,7 +81,7 @@ public sealed class Attachable : Component
 		Tags.Set( "attached", false );
 
 		if ( DetachSound is not null )
-			Sound.Play( DetachSound, Transform.Position );
+			Sound.Play( DetachSound, WorldPosition );
 
 		CurrentAttachmentPoint = null;
 	}

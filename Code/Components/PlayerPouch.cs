@@ -50,7 +50,7 @@ public partial class PlayerPouch : Component, Component.ITriggerListener, IGrabb
 		}
 
 		// Did we drop something in the vicinity of the pouch?
-		if ( interactable.Transform.Position.Distance( Transform.Position ) < PouchRadius )
+		if ( interactable.WorldPosition.Distance( WorldPosition ) < PouchRadius )
 		{
 			HeldInteractable = interactable;
 			HeldInteractable.FreezeMotion();
@@ -61,8 +61,8 @@ public partial class PlayerPouch : Component, Component.ITriggerListener, IGrabb
 	{
 		if ( HeldInteractable.IsValid() )
 		{
-			HeldInteractable.Transform.Position = HeldInteractable.Transform.Position.LerpTo( Transform.Position, Time.Delta * LerpSpeed );
-			HeldInteractable.Transform.Rotation = Rotation.Lerp( HeldInteractable.Transform.Rotation, Transform.Rotation, Time.Delta * LerpSpeed );
+			HeldInteractable.WorldPosition = HeldInteractable.WorldPosition.LerpTo( WorldPosition, Time.Delta * LerpSpeed );
+			HeldInteractable.WorldRotation = Rotation.Lerp( HeldInteractable.WorldRotation, WorldRotation, Time.Delta * LerpSpeed );
 		}
 	}
 }
